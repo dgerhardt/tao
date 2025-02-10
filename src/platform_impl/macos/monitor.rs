@@ -23,6 +23,7 @@ use core_foundation::{
   string::CFString,
 };
 use core_graphics::display::{CGDirectDisplayID, CGDisplay, CGDisplayBounds};
+use dpi::LogicalPosition;
 
 #[derive(Clone)]
 pub struct VideoMode {
@@ -166,7 +167,9 @@ pub fn from_point(x: f64, y: f64) -> Option<MonitorHandle> {
   unsafe {
     for monitor in available_monitors() {
       let bound = CGDisplayBounds(monitor.0);
-      if CGRectContainsPoint(bound, CGPoint::new(x, y)) > 0 {
+      let position =
+        LogicalPosition::from_physical::<_, f64>((x as f64, y as f64), monitor.scale_factor());
+      if CGRectContainsPoint(bound, CGPoint::new(position.x, position.y)) > 0 {
         return Some(monitor);
       }
     }
